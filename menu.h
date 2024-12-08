@@ -6,7 +6,6 @@
 #include <SFML/Audio.hpp>
 
 using namespace sf;
-
 class Menu {
 public:
     Font font;
@@ -19,7 +18,8 @@ public:
     Sound sound;
 
     Menu();
-    void display_menu();
+    void DisplayMenu();
+    std::string EnterName();
 };
 
 Menu::Menu()
@@ -68,7 +68,55 @@ Menu::Menu()
     sound.setBuffer(buffer);
 }
 
-void Menu::display_menu() {
+std::string Menu::EnterName()
+{
+    RenderWindow window(VideoMode(800, 800), "Name Input");
+    Font font;
+    font.loadFromFile("assets/fonts/Plaguard.otf");
+
+    Text promptText("PLEASE ENTER YOUR NAME:", font, 36);
+    promptText.setFillColor(Color::White);
+    promptText.setPosition(10, 10);
+
+    Text text;
+    text.setFont(font);
+    text.setCharacterSize(48);
+    text.setFillColor(Color::White);
+    text.setPosition(10, 60);
+
+    std::string name;
+
+    while (window.isOpen()) {
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                window.close();
+            }
+            else if (event.type == Event::TextEntered) {
+                if (event.text.unicode < 128) {
+                    if (event.text.unicode == '\b' && !name.empty()) {
+                        name.pop_back();
+                    }
+                    else if (event.text.unicode == '\r') {
+                        std::cout << "Entered name: " << name << std::endl;
+                        window.close();
+                    }
+                    else {
+                        name += static_cast<char>(event.text.unicode);
+                    }
+                    text.setString(name);
+                }
+            }
+        }
+        window.clear(Color::Black);
+        window.draw(promptText);
+        window.draw(text);
+        window.display();
+    }
+    return name;
+}
+
+void Menu::DisplayMenu() {
     RenderWindow window(VideoMode(800, 800), "Space Shooter");
 
     Image cursorImage;
@@ -103,7 +151,6 @@ and     the                  surrounding      asteroids.
 
     float crawlSpeed = 1.0f;
     float crawlPosY = 800.0;
-
     
     while (crawlText.getPosition().y > -crawlText.getLocalBounds().height) {
         Event event;
@@ -112,15 +159,12 @@ and     the                  surrounding      asteroids.
                 window.close();
             }
         }
-
         crawlPosY -= crawlSpeed;
         crawlText.setPosition(400, crawlPosY);
-
         window.clear();
         window.draw(crawlText);
         window.draw(title);
         window.display();
-
     }
 
     Clock clock;
@@ -150,7 +194,6 @@ and     the                  surrounding      asteroids.
     }
     tempOptions[selectedOption].setFillColor(Color::Cyan);
 
-    std::string playerName;
     while (window.isOpen()) {
         Event event;
         while (window.pollEvent(event)) {
@@ -171,9 +214,10 @@ and     the                  surrounding      asteroids.
                     }
                 }
                 if (event.key.code == Keyboard::Return) {
+                    std::string playerName;
                     switch (selectedOption) {
                     case 0:
-                        // Do start game
+                        playerName = EnterName();
                         window.close();
                         break;
                     case 1:

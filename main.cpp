@@ -3,6 +3,6 @@
 int main()
 {
     Menu m;
-    m.display_menu();
+    m.DisplayMenu();
     return 0;
 }
